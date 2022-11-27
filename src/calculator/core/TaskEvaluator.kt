@@ -11,7 +11,7 @@ class TaskEvaluator(private val scanner: Scanner) {
 
     }
 
-    val mainStack = Stack<StackItem>()
+    private val mainStack = Stack<StackItem>()
 
     private fun sanitizeOperator(input: String): StackItem {
         // Filter out multiple ---- or +++. The +-++--- will crash the app
@@ -25,30 +25,27 @@ class TaskEvaluator(private val scanner: Scanner) {
         }
     }
 
-    // 9 +++ 10 -- 8 --- 1 ++ 3
-
     fun fillStackForCalculation() {
-
         var expectant = EXPECT_OPERAND
         while (scanner.hasNext()) {
 
-            if (expectant == EXPECT_OPERAND) {
-                mainStack.push(Operand(scanner.nextDouble()))
-                println("added operand: ${mainStack.peek()}")
-                expectant = EXPECT_OPERATOR
-            } else if (expectant == EXPECT_OPERATOR) {
-                mainStack.push(sanitizeOperator(scanner.next()))
-                println("added operator: ${mainStack.peek()}")
-                expectant = EXPECT_OPERAND
-            } else {
-                throw Exception("WOW SOMETHING IS MESSED UP! $expectant")
+            when (expectant) {
+                EXPECT_OPERAND -> {
+                    mainStack.push(Operand(scanner.nextDouble()))
+                    println("added operand: ${mainStack.peek()}")
+                    expectant = EXPECT_OPERATOR
+                }
+                EXPECT_OPERATOR -> {
+                    mainStack.push(sanitizeOperator(scanner.next()))
+                    println("added operator: ${mainStack.peek()}")
+                    expectant = EXPECT_OPERAND
+                }
+                else -> throw Exception("This is unexpected: $expectant, crashing!")
             }
 
             println("Stack so far: $mainStack")
         }
         // must not expect operand (= we do not have a trailing operator)
         check(expectant == EXPECT_OPERAND)
-
     }
-
 }
