@@ -8,11 +8,12 @@ fun main() {
     val scanner = Scanner(System.`in`)
     scanner.useLocale(Locale.US)
 
-    val taskEvaluator = TaskEvaluator(scanner)
+    val taskEvaluator = TaskEvaluator()
 
-
-    taskEvaluator.fillStackForCalculation()
-
+    while (scanner.hasNextLine()) {
+        taskEvaluator.fillStackForCalculation(scanner.nextLine().split(" "))
+        println(taskEvaluator.calculateStack().toInt())
+    }
 
 //    val controller = Controller(scanner)
 //
