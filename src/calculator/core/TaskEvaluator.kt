@@ -20,9 +20,9 @@ class TaskEvaluator {
         with (input.toList().groupBy { it }) {
             require( this.size == 1 )
             if (this.values.first()[0] == '-' && this.values.first().size % 2 != 0) {
-                return Operator(Operator.OperatorType.MINUS)
+                return Operator(Operator.OperatorType.SUBTRACTION)
             } else {
-                return Operator(Operator.OperatorType.PLUS)
+                return Operator(Operator.OperatorType.ADDITION)
             }
         }
     }
@@ -35,6 +35,8 @@ class TaskEvaluator {
                     //println("added operand: ${mainStack.peek()}")
                     EXPECT_OPERATOR
                 }
+
+
 
                 EXPECT_OPERATOR -> {
                     mainStack.push(sanitizeOperator(item))

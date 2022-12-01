@@ -1,7 +1,7 @@
 package calculator
 
+import calculator.core.Operator
 import calculator.core.TaskEvaluator
-import calculator.input.Input
 import java.util.*
 
 fun main() {
@@ -14,6 +14,9 @@ fun main() {
         taskEvaluator.fillStackForCalculation(scanner.nextLine().split(" "))
         println(taskEvaluator.calculateStack().toInt())
     }
+
+    val x = Operator.Companion.OperatorType.PLUS
+
 
 //    val controller = Controller(scanner)
 //
