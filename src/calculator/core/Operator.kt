@@ -1,32 +1,36 @@
 package calculator.core
 
+import java.lang.IllegalArgumentException
 import kotlin.math.pow
 
-class Operator(private val type: OperatorType): StackItem {
+class Operator(val type: OperatorType): StackItem {
 
     companion object {
-        fun getOperatorFromString(input: String): Operator {
+        public fun getOperatorFromString(input: String): Operator {
             // input must be non-empty
             require(input.isNotEmpty())
             // input must contain the same character
-            require(input.contains("${input[0]}+".toRegex()))
+            val rex = when (input[0]) {
+                '+' -> "\\++".toRegex()
+                '*' -> "\\*+".toRegex()
+                else -> "${input[0]}+".toRegex()
+            }
+            //println(rex)
+            require(input.matches(rex))
 
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-
-
+            return when (input[0]) {
+                '+' -> {
+                    //println("only pluses")
+                    Operator(OperatorType.ADDITION)
+                }
+                '-' -> {
+                    //println("only minuses")
+                    if (input.length % 2 == 0) Operator(OperatorType.ADDITION) else Operator(OperatorType.SUBTRACTION)
+                }
+                '*' -> Operator(OperatorType.MULTIPLICATION)
+                '/' -> Operator(OperatorType.DIVISION)
+                else -> throw IllegalArgumentException("Invalid operator $input")
+            }
         }
     }
 
@@ -38,8 +42,8 @@ class Operator(private val type: OperatorType): StackItem {
     ) {
         ADDITION('+', 1, { operand1, operand2 -> Operand(operand1.value + operand2.value) }),
         SUBTRACTION('-', 1, { operand1, operand2 -> Operand(operand1.value - operand2.value) }),
-        MULTIPLICATION('*', 2, { operand1, operand2 -> Operand(operand2.value * operand1.value) }),
-        DIVISION('/', 2, { operand1, operand2 -> Operand(operand2.value / operand1.value) }),
+        MULTIPLICATION('*', 2, { operand1, operand2 -> Operand(operand1.value * operand2.value) }),
+        DIVISION('/', 2, { operand1, operand2 -> Operand(operand1.value / operand2.value) }),
         EXPONENT('^', 3, { operand1, operand2 -> Operand(operand1.value.pow(operand2.value)) }) ;
         // PARENTHESES_?('(', 4, { operand1, operand2 -> ??? } ) - tough cookie
     }

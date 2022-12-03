@@ -1,5 +1,6 @@
 package calculator
 
+import calculator.core.TaskEvaluator
 import calculator.input.Command
 import calculator.input.Input
 import java.lang.NumberFormatException
@@ -8,7 +9,7 @@ import java.util.Scanner
 /**
  * Reads input and
  */
-class Controller(private val scanner: Scanner) {
+class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEvaluator) {
 
     private var terminate = false
 
@@ -50,20 +51,9 @@ class Controller(private val scanner: Scanner) {
                     continue
                 }
 
-                // we're dealing with a valid task
-                // create validation result ... check for validation errors?
-
-                // task is a executable term ... a split of
-
-
-                val task = getInputAsNumbers(inputStr)
-                if (task.isNotEmpty()) {
-
-
-
-
-
-                    println(performComputation(task))
+                // not a command, must be a computation task
+                if (inputStr.isNotEmpty()) {
+                    println(taskEvaluator.processInput(inputStr.split(" ")))
                     continue
                 }
 
