@@ -1,6 +1,6 @@
 package calculator.core
 
-import calculator.main
+import calculator.debugMe
 import java.util.*
 
 class TaskEvaluator {
@@ -23,16 +23,18 @@ class TaskEvaluator {
             val leftOperand = mainStack.pop() as Operand
             mainStack.push(operator.performOperation(leftOperand, rightOperand))
         }
-        //println("after stack is eaten: ${mainStack.peek().toString()}")
+        debugMe("after stack is eaten: ${mainStack.peek()}")
     }
 
     fun processInput(words: List<String>): Double {
+        // stack must be empty before any calculation
+        check(mainStack.empty())
 
-        println("input: $words")
+        debugMe("input: $words")
 
         // empty, a dud
         if (words.isEmpty()) {
-            println("nothing, empty term")
+            debugMe("nothing, empty term")
             return 0.0
         }
 
@@ -42,7 +44,7 @@ class TaskEvaluator {
         // one word, must be an operand
         if (words.size == 1) {
             // let it crash if no double, whatever, own fault
-            println("just one fella here, must be an operand")
+            debugMe("just one fella here, must be an operand = print it as a result")
             return word.next().toDouble()
         }
 
@@ -62,13 +64,13 @@ class TaskEvaluator {
          *   then we would not read left-to-right, but right-to-left ... but we cannot have same level operations
          *   because rule "if same priority, evaluate" would not have been applied.
          */
-        //println("ready for main loop --- beginning")
+        debugMe("ready for main loop --- beginning")
 
         while (true) {
 
             //!!! if queue has depth 1 we're done!
             if (mainStack.size == 1) {
-                println("main stack size == 1")
+                debugMe("main stack size == 1")
                 break
             }
 
@@ -80,33 +82,33 @@ class TaskEvaluator {
             // words: we're here >>> X4 + x_4 + X5 + x_5 ...
             val operand2 = Operand(word.next().toDouble()) // X4
 
-            println("$operand1 $operator1 $operand2")
+            debugMe("$operand1 $operator1 $operand2")
 
             // this will be the end!
             if (!word.hasNext()) {
-                //println("the end, just finish stack and done")
+                debugMe("the end, just finish stack and done")
                 mainStack.push(operator1.performOperation(operand1, operand2))
                 eatStack()
                 break
                 // there's a next word
             } else {
                 val lookAhead = Operator.getOperatorFromString(word.next())
-                println("the look ahead: $lookAhead")
+                debugMe("the look ahead: $lookAhead")
 
                 // if "look ahead" operator's priority is lower, calculate operation and consume stack until empty
                 if (operator1.type.priority > lookAhead.type.priority) {
-                    println("push calculation and eat stack")
+                    debugMe("push calculation and eat stack")
                     mainStack.push(operator1.performOperation(operand1, operand2))
                     eatStack()
 
                     // if "look ahead" operator's priority is same, calculate operation and put on stack
                 } else if (operator1.type.priority == lookAhead.type.priority) {
-                    println("same priority, just push result")
+                    debugMe("same priority, just push result")
                     mainStack.push(operator1.performOperation(operand1, operand2))
 
                     // if "look ahead" operator's priority is higher, only put on stack (cant evaluate for now)
                 } else {
-                    println("higher priority, no result, just push")
+                    debugMe("higher priority, no result, just push")
                     mainStack.push(operand1)
                     mainStack.push(operator1)
                     mainStack.push(operand2)
@@ -116,7 +118,7 @@ class TaskEvaluator {
 
             }
         }
-        //println("done main loop: ${mainStack.peek().toString()}")
+        debugMe("done main loop: ${mainStack.peek()}")
 
         return (mainStack.pop() as Operand).value
     }

@@ -1,5 +1,6 @@
 package calculator.core
 
+import calculator.debugMe
 import java.lang.IllegalArgumentException
 import kotlin.math.pow
 
@@ -13,22 +14,24 @@ class Operator(val type: OperatorType): StackItem {
             val rex = when (input[0]) {
                 '+' -> "\\++".toRegex()
                 '*' -> "\\*+".toRegex()
+                '^' -> "\\^+".toRegex()
                 else -> "${input[0]}+".toRegex()
             }
-            //println(rex)
+            debugMe("input: $input, regex: $rex")
             require(input.matches(rex))
 
             return when (input[0]) {
                 '+' -> {
-                    //println("only pluses")
+                    debugMe("only pluses")
                     Operator(OperatorType.ADDITION)
                 }
                 '-' -> {
-                    //println("only minuses")
+                    debugMe("only minuses")
                     if (input.length % 2 == 0) Operator(OperatorType.ADDITION) else Operator(OperatorType.SUBTRACTION)
                 }
                 '*' -> Operator(OperatorType.MULTIPLICATION)
                 '/' -> Operator(OperatorType.DIVISION)
+                '^' -> Operator(OperatorType.EXPONENT)
                 else -> throw IllegalArgumentException("Invalid operator $input")
             }
         }
