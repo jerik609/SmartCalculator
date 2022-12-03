@@ -1,13 +1,10 @@
-package calculator
+package calculator.input
 
 import calculator.core.TaskEvaluator
-import calculator.input.Command
-import calculator.input.Input
-import java.lang.NumberFormatException
 import java.util.Scanner
 
 /**
- * Reads input and
+ * Reads input and calls the respective branch (should implement handlers at some point)
  */
 class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEvaluator) {
 
@@ -28,17 +25,6 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
         }
     }
 
-    private fun getInputAsNumbers(input: String): List<Int> {
-        return try {
-            input.trim().split(" ").map { it.toInt() }
-        } catch (e: NumberFormatException) {
-            emptyList()
-        }
-    }
-
-    private fun performComputation(computation: List<Int>) =
-        computation.reduce{ acc, elem -> acc + elem }
-
     fun mainLoop() {
         do {
             if (scanner.hasNextLine()) {
@@ -53,7 +39,7 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
 
                 // not a command, must be a computation task
                 if (inputStr.isNotEmpty()) {
-                    println(taskEvaluator.processInput(inputStr.split(" ")))
+                    println(taskEvaluator.processInput(inputStr.split(" ")).toInt())
                     continue
                 }
 

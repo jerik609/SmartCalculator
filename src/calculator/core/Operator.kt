@@ -17,16 +17,16 @@ class Operator(val type: OperatorType): StackItem {
                 '^' -> "\\^+".toRegex()
                 else -> "${input[0]}+".toRegex()
             }
-            debugMe("input: $input, regex: $rex")
+            //debugMe("input: $input, regex: $rex")
             require(input.matches(rex))
 
             return when (input[0]) {
                 '+' -> {
-                    debugMe("only pluses")
+                    //debugMe("only pluses")
                     Operator(OperatorType.ADDITION)
                 }
                 '-' -> {
-                    debugMe("only minuses")
+                    //debugMe("only minuses")
                     if (input.length % 2 == 0) Operator(OperatorType.ADDITION) else Operator(OperatorType.SUBTRACTION)
                 }
                 '*' -> Operator(OperatorType.MULTIPLICATION)
@@ -43,6 +43,7 @@ class Operator(val type: OperatorType): StackItem {
         val priority: Int,
         val operation: (Operand, Operand) -> Operand
     ) {
+        ZERO_OPERATOR('0', 0, { _, _ -> Operand(0.0) }),
         ADDITION('+', 1, { operand1, operand2 -> Operand(operand1.value + operand2.value) }),
         SUBTRACTION('-', 1, { operand1, operand2 -> Operand(operand1.value - operand2.value) }),
         MULTIPLICATION('*', 2, { operand1, operand2 -> Operand(operand1.value * operand2.value) }),

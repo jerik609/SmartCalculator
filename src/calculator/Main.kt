@@ -1,9 +1,10 @@
 package calculator
 
 import calculator.core.TaskEvaluator
+import calculator.input.Controller
 import java.util.*
 
-const val debugActivated = true
+const val debugActivated = false
 
 fun debugMe(msg: String) {
     if (debugActivated) println(msg)
@@ -19,13 +20,11 @@ fun main() {
     val controller = Controller(scanner, TaskEvaluator())
 
     controller.mainLoop()
-
-    // 2 + 3 ^ 2 * 2
 }
 
 fun tests() {
     val taskEvaluator = TaskEvaluator()
-    check(taskEvaluator.processInput("2 - 3 + 2 - 5".split(" ")) == -4.0).also { println("=====1=====") }
-    check(taskEvaluator.processInput("5 - 3 * 2 - 6".split(" ")) == -7.0).also { println("=====2=====") }
-    check(taskEvaluator.processInput("2 + 3 ^ 2 * 2".split(" ")) == 20.0).also { println("=====3=====") }
+    check(taskEvaluator.processInput("2 - 3 + 2 - 5".split(" ")) == -4.0).also { debugMe("=====1=====") }
+    check(taskEvaluator.processInput("5 - 3 * 2 - 6".split(" ")) == -7.0).also { debugMe("=====2=====") }
+    check(taskEvaluator.processInput("2 + 3 ^ 2 * 2".split(" ")) == 20.0).also { debugMe("=====3=====") }
 }

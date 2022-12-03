@@ -15,15 +15,38 @@ class TaskEvaluator {
 
     /**
      * Evaluates the stack until only one element remains, which will be left on the stack
+     * @param lookAhead may consume the stack, as long as priority of operator on stack is greater or equal to it
      */
-    private fun eatStack() {
-        while (mainStack.size != 1) {
+    private fun eatStack(lookAhead: Operator) {
+        debugMe("  EAT_STACK: stack: $mainStack")
+        debugMe("  EAT_STACK: ----- beginning main loop -----")
+        do {
+            if (mainStack.size < 3) {
+                debugMe("  EAT_STACK: ----- no more terms left on stack, depth: ${mainStack.size} -----")
+                break
+            }
+
             val rightOperand = mainStack.pop() as Operand
             val operator = mainStack.pop() as Operator
             val leftOperand = mainStack.pop() as Operand
-            mainStack.push(operator.performOperation(leftOperand, rightOperand))
-        }
-        debugMe("after stack is eaten: ${mainStack.peek()}")
+
+            debugMe("  EAT_STACK: stack operator: $operator, lookAhead operator: $lookAhead")
+
+            // can't evaluate further, lookAhead has higher priority
+            if (operator.type.priority < lookAhead.type.priority) {
+                debugMe("  EAT_STACK: can't continue, lookAhead has higher priority")
+                mainStack.push(leftOperand)
+                mainStack.push(operator)
+                mainStack.push(rightOperand)
+                break
+            } else {
+                debugMe("  EAT_STACK: eating the stack, lookAhead has same or lower priority")
+                mainStack.push(operator.performOperation(leftOperand, rightOperand))
+            }
+            debugMe("  EAT_STACK: ----- next loop -----")
+        } while (true)
+
+        debugMe("  EAT_STACK: done -> top element on stack: ${mainStack.peek()}")
     }
 
     fun processInput(words: List<String>): Double {
@@ -57,65 +80,70 @@ class TaskEvaluator {
          * "the look ahead" logic
          *
          * if "look ahead" operator's priority is higher, then put on stack (cant evaluate for now)
-         * if "look ahead" operator's priority is same, then evaluate in forward direction (safe to do)
-         * if "look ahead" operator's priority is lower, then do not evaluate further, but consume stack until empty
+         * if "look ahead" operator's priority is same or lower, evaluate term, put it on stack and try to process stack
+         *     read "operations" from stack and process them, as long as operator on stack is higher or same priority as "look ahead"
+         *     if "look ahead" is higher, then stop processing the stack and process input
          *
-         * The last one deserves an explanation - the problem would be if we had same level operations on stack
-         *   then we would not read left-to-right, but right-to-left ... but we cannot have same level operations
-         *   because rule "if same priority, evaluate" would not have been applied.
+         * given that input is well-formed (valid calculation task), then we should be able to calculate the task
+         * anything else indicates an invalid input
+         *
+         * rationale:
+         * - when operators are same priority or lower, we immediately calculate
+         * - we only put operators on stack with an increasing priority - in an order which has to be evaluated top to bottom
+         * - when evaluating the stack, we will do so, until we are not able, because the stack (to the left) has now
+         * a lower priority than unprocessed input to the right
+         * - when the end of the input is reached, the last operator is a special "zero priority" operator and this will ensure
+         * that the stack can be completely consumed
+         *
          */
-        debugMe("ready for main loop --- beginning")
+        debugMe("----- beginning main loop -----")
 
         while (true) {
 
-            //!!! if queue has depth 1 we're done!
+            // if stack size is 1, we're done, and we can take the result
             if (mainStack.size == 1) {
                 debugMe("main stack size == 1")
                 break
             }
 
             // stack: ... X1 +_1 X2 +_2 X3 +_3 <<< we're here
-
-            val operator1 = mainStack.pop() as Operator // +_3
-            val operand1 = mainStack.pop() as Operand // X3
+            val operator = mainStack.pop() as Operator // +_3
+            val leftOperand = mainStack.pop() as Operand // X3
 
             // words: we're here >>> X4 + x_4 + X5 + x_5 ...
-            val operand2 = Operand(word.next().toDouble()) // X4
+            val rightOperand = Operand(word.next().toDouble()) // X4
 
-            debugMe("$operand1 $operator1 $operand2")
+            debugMe("processing term: $leftOperand $operator $rightOperand")
 
-            // this will be the end!
+            // input is processed, just evaluate stack
             if (!word.hasNext()) {
-                debugMe("the end, just finish stack and done")
-                mainStack.push(operator1.performOperation(operand1, operand2))
-                eatStack()
+                debugMe("the end of input, now just finish stack and we're done")
+                mainStack.push(operator.performOperation(leftOperand, rightOperand))
+                eatStack(Operator(Operator.OperatorType.ZERO_OPERATOR))
                 break
-                // there's a next word
+            // there's a next word
             } else {
                 val lookAhead = Operator.getOperatorFromString(word.next())
-                debugMe("the look ahead: $lookAhead")
+                debugMe("the lookAhead operator: $lookAhead")
 
-                // if "look ahead" operator's priority is lower, calculate operation and consume stack until empty
-                if (operator1.type.priority > lookAhead.type.priority) {
-                    debugMe("push calculation and eat stack")
-                    mainStack.push(operator1.performOperation(operand1, operand2))
-                    eatStack()
-
-                    // if "look ahead" operator's priority is same, calculate operation and put on stack
-                } else if (operator1.type.priority == lookAhead.type.priority) {
-                    debugMe("same priority, just push result")
-                    mainStack.push(operator1.performOperation(operand1, operand2))
-
-                    // if "look ahead" operator's priority is higher, only put on stack (cant evaluate for now)
+                // if "look ahead" operator's priority is higher, only put everything on stack (can't evaluate for now)
+                if (operator.type.priority < lookAhead.type.priority) {
+                    debugMe("lookAhead has higher priority, just put on stack and read next value")
+                    mainStack.push(leftOperand)
+                    mainStack.push(operator)
+                    mainStack.push(rightOperand)
+                // if "look ahead" operator's priority is lower or the same, calculate operation and try to consume stack
                 } else {
-                    debugMe("higher priority, no result, just push")
-                    mainStack.push(operand1)
-                    mainStack.push(operator1)
-                    mainStack.push(operand2)
+                    debugMe("lookAhead has lower or same priority, calculate & put on stack, then evaluate stack")
+                    mainStack.push(operator.performOperation(leftOperand, rightOperand))
+                    eatStack(lookAhead)
                 }
 
+                // push the look ahead on stack so that it's not lost! :-)
                 mainStack.push(lookAhead)
 
+                debugMe("stack: $mainStack")
+                debugMe("----- next loop -----")
             }
         }
         debugMe("done main loop: ${mainStack.peek()}")
