@@ -151,25 +151,4 @@ class TaskEvaluator {
         return (mainStack.pop() as Operand).value
     }
 
-    fun calculateStack(): Double {
-
-        while (mainStack.isNotEmpty()) {
-
-            val operand1 = mainStack.pop()
-            check(operand1 is Operand)
-
-            if (mainStack.empty()) {
-                return operand1.value
-            }
-
-            val operator = mainStack.pop()
-            check(operator is Operator)
-
-            val operand2 = mainStack.pop()
-            check(operand2 is Operand)
-
-            mainStack.push(operator.performOperation(operand1, operand2))
-        }
-        throw Exception("It's not possible to end up here :-)")
-    }
 }
