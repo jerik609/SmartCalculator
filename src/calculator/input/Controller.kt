@@ -1,6 +1,7 @@
 package calculator.input
 
 import calculator.core.TaskEvaluator
+import calculator.core.UnknownVariableException
 import calculator.debugMe
 import java.lang.NumberFormatException
 import java.util.Scanner
@@ -113,6 +114,9 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
                     } catch (e: NumberFormatException) {
                         debugMe(e.message ?: "")
                         println("Invalid expression")
+                    } catch (e: UnknownVariableException) {
+                        debugMe(e.message ?: "")
+                        println("Unknown variable")
                     }
                 }
             }

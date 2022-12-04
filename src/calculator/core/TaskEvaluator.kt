@@ -39,6 +39,14 @@ class TaskEvaluator {
 
     fun getVariable(variableKey: String) = variables[variableKey]
 
+    private fun getOperandFromRawInput(raw: String): Operand {
+        return if (raw.matches("[a-zA-Z]+".toRegex())) {
+            Operand(variables[raw] ?: throw UnknownVariableException("Unknown variable $raw"))
+        } else {
+            Operand(raw.toDouble())
+        }
+    }
+
     /**
      * Calculates the stack, until only one element remains, which will be left on the stack.
      * @param lookAhead priority of the "next" operator, we can calculate the stack as long as stack priority is lower
@@ -98,12 +106,12 @@ class TaskEvaluator {
         if (words.size == 1) {
             // let it crash if no double, whatever, own fault
             debugMe("just one fella here, must be an operand = print it as a result")
-            return word.next().toDouble()
+            return getOperandFromRawInput(word.next()).value
         }
 
         require(words.size >= 3) // anything else would be nonsense and deserves a crash
 
-        mainStack.push(Operand(word.next().toDouble()))
+        mainStack.push(getOperandFromRawInput(word.next()))
         mainStack.push(Operator.getOperatorFromString(word.next()))
 
         debugMe("----- beginning main loop -----")
@@ -120,7 +128,7 @@ class TaskEvaluator {
             val leftOperand = mainStack.pop() as Operand // X3
 
             // words: we're here >>> X4 + x_4 + X5 + x_5 ...
-            val rightOperand = Operand(word.next().toDouble()) // X4
+            val rightOperand = getOperandFromRawInput(word.next()) // X4
 
             debugMe("processing term: $leftOperand $operator $rightOperand")
 

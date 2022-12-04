@@ -4,7 +4,7 @@ import calculator.core.TaskEvaluator
 import calculator.input.Controller
 import java.util.*
 
-const val debugActivated = true
+const val debugActivated = false
 
 fun debugMe(msg: String) {
     if (debugActivated) println(msg)
