@@ -1,5 +1,7 @@
 package calculator.input
 
+import calculator.debugMePrintln
+
 class Input {
 
     companion object {
@@ -10,6 +12,18 @@ class Input {
             }
             throw UnknownCommandException("Unknown command: $commandStr")
         }
+
+        fun isVariableAssignment(input: String) = input
+            .matches("^\\s*[a-zA-Z]+\\s*=\\s*(.*)\\s*".toRegex())
+            .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable assignment") }
+
+        fun isValidVariableAssignment(input: String) = input
+            .matches("^\\s*[a-zA-Z]+\\s*=\\s*(0|[1-9][0-9]*|[a-zA-Z]+)\\s*".toRegex())
+            .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a VALID variable assignment") }
+
+        fun isVariableInquiry(input: String) = input
+            .matches("\\s*[a-zA-Z]+\\s*".toRegex())
+            .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable inquiry") }
 
     }
 

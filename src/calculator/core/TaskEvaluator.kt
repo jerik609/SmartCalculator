@@ -1,6 +1,6 @@
 package calculator.core
 
-import calculator.debugMe
+import calculator.debugMePrintln
 import java.util.*
 
 /**
@@ -52,11 +52,11 @@ class TaskEvaluator {
      * @param lookAhead priority of the "next" operator, we can calculate the stack as long as stack priority is lower
      */
     private fun eatStack(lookAhead: Operator) {
-        debugMe("  EAT_STACK: stack: $mainStack")
-        debugMe("  EAT_STACK: ----- beginning main loop -----")
+        debugMePrintln("  EAT_STACK: stack: $mainStack")
+        debugMePrintln("  EAT_STACK: ----- beginning main loop -----")
         do {
             if (mainStack.size < 3) {
-                debugMe("  EAT_STACK: ----- no more terms left on stack, depth: ${mainStack.size} -----")
+                debugMePrintln("  EAT_STACK: ----- no more terms left on stack, depth: ${mainStack.size} -----")
                 break
             }
 
@@ -64,23 +64,23 @@ class TaskEvaluator {
             val operator = mainStack.pop() as Operator
             val leftOperand = mainStack.pop() as Operand
 
-            debugMe("  EAT_STACK: stack operator: $operator, lookAhead operator: $lookAhead")
+            debugMePrintln("  EAT_STACK: stack operator: $operator, lookAhead operator: $lookAhead")
 
             // can't evaluate further, lookAhead has higher priority
             if (operator.type.priority < lookAhead.type.priority) {
-                debugMe("  EAT_STACK: can't continue, lookAhead has higher priority")
+                debugMePrintln("  EAT_STACK: can't continue, lookAhead has higher priority")
                 mainStack.push(leftOperand)
                 mainStack.push(operator)
                 mainStack.push(rightOperand)
                 break
             } else {
-                debugMe("  EAT_STACK: eating the stack, lookAhead has same or lower priority")
+                debugMePrintln("  EAT_STACK: eating the stack, lookAhead has same or lower priority")
                 mainStack.push(operator.performOperation(leftOperand, rightOperand))
             }
-            debugMe("  EAT_STACK: ----- next loop -----")
+            debugMePrintln("  EAT_STACK: ----- next loop -----")
         } while (true)
 
-        debugMe("  EAT_STACK: done -> top element on stack: ${mainStack.peek()}")
+        debugMePrintln("  EAT_STACK: done -> top element on stack: ${mainStack.peek()}")
     }
 
     /**
@@ -92,10 +92,10 @@ class TaskEvaluator {
         // stack must be empty before any calculation
         check(mainStack.empty())
 
-        debugMe("input: $words")
+        debugMePrintln("input: $words")
 
         if (words.isEmpty()) {
-            debugMe("nothing, empty term")
+            debugMePrintln("nothing, empty term")
             return 0.0
         }
 
@@ -105,7 +105,7 @@ class TaskEvaluator {
         // one word, must be an operand
         if (words.size == 1) {
             // let it crash if no double, whatever, own fault
-            debugMe("just one fella here, must be an operand = print it as a result")
+            debugMePrintln("just one fella here, must be an operand = print it as a result")
             return getOperandFromRawInput(word.next()).value
         }
 
@@ -114,12 +114,12 @@ class TaskEvaluator {
         mainStack.push(getOperandFromRawInput(word.next()))
         mainStack.push(Operator.getOperatorFromString(word.next()))
 
-        debugMe("----- beginning main loop -----")
+        debugMePrintln("----- beginning main loop -----")
         while (true) {
 
             // if stack size is 1, we're done, and we can take the result
             if (mainStack.size == 1) {
-                debugMe("main stack size == 1")
+                debugMePrintln("main stack size == 1")
                 break
             }
 
@@ -130,28 +130,28 @@ class TaskEvaluator {
             // words: we're here >>> X4 + x_4 + X5 + x_5 ...
             val rightOperand = getOperandFromRawInput(word.next()) // X4
 
-            debugMe("processing term: $leftOperand $operator $rightOperand")
+            debugMePrintln("processing term: $leftOperand $operator $rightOperand")
 
             // input is processed, just evaluate stack
             if (!word.hasNext()) {
-                debugMe("the end of input, now just finish stack and we're done")
+                debugMePrintln("the end of input, now just finish stack and we're done")
                 mainStack.push(operator.performOperation(leftOperand, rightOperand))
                 eatStack(Operator(Operator.OperatorType.ZERO_OPERATOR))
                 break
             // there's a next word
             } else {
                 val lookAhead = Operator.getOperatorFromString(word.next())
-                debugMe("the lookAhead operator: $lookAhead")
+                debugMePrintln("the lookAhead operator: $lookAhead")
 
                 // if "look ahead" operator's priority is higher, only put everything on stack (can't evaluate for now)
                 if (operator.type.priority < lookAhead.type.priority) {
-                    debugMe("lookAhead has higher priority, just put on stack and read next value")
+                    debugMePrintln("lookAhead has higher priority, just put on stack and read next value")
                     mainStack.push(leftOperand)
                     mainStack.push(operator)
                     mainStack.push(rightOperand)
                 // if "look ahead" operator's priority is lower or the same, calculate operation and try to consume stack
                 } else {
-                    debugMe("lookAhead has lower or same priority, calculate & put on stack, then evaluate stack")
+                    debugMePrintln("lookAhead has lower or same priority, calculate & put on stack, then evaluate stack")
                     mainStack.push(operator.performOperation(leftOperand, rightOperand))
                     eatStack(lookAhead)
                 }
@@ -159,11 +159,11 @@ class TaskEvaluator {
                 // push the look ahead on stack so that it's not lost! :-)
                 mainStack.push(lookAhead)
 
-                debugMe("stack: $mainStack")
-                debugMe("----- next loop -----")
+                debugMePrintln("stack: $mainStack")
+                debugMePrintln("----- next loop -----")
             }
         }
-        debugMe("done main loop: ${mainStack.peek()}")
+        debugMePrintln("done main loop: ${mainStack.peek()}")
 
         return (mainStack.pop() as Operand).value
     }
