@@ -1,8 +1,6 @@
 package calculator.core
 
-import calculator.debugMe
 import calculator.input.InvalidExpressionException
-import java.lang.IllegalArgumentException
 import kotlin.math.pow
 
 class Operator(val type: OperatorType): StackItem {

@@ -3,19 +3,38 @@ package calculator.core
 import calculator.debugMe
 import java.util.*
 
+/**
+ * How does it work:
+ *
+ * I use a stack, you can imagine it as running on a mountain ridge - up you go slowly, down you go quickly - until you
+ * reach another climb up.
+ *
+ * Thus, "the look ahead" logic:
+ *
+ * if "look ahead" operator's priority is higher, then put on stack (cant evaluate for now)
+ * if "look ahead" operator's priority is same or lower, evaluate term, put it on stack and try to process stack
+ *     read "operations" from stack and process them, as long as operator on stack is higher or same priority as "look ahead"
+ *     if "look ahead" is higher, then stop processing the stack and process input
+ *
+ * given that input is well-formed (valid calculation task), then we should be able to calculate the task
+ * anything else indicates an invalid input
+ *
+ * rationale:
+ * - when operators are same priority or lower, we immediately calculate
+ * - we only put operators on stack with an increasing priority - in an order which has to be evaluated top to bottom
+ * - when evaluating the stack, we will do so, until we are not able, because the stack (to the left) has now
+ * a lower priority than unprocessed input to the right
+ * - when the end of the input is reached, the last operator is a special "zero priority" operator and this will ensure
+ * that the stack can be completely consumed
+ *
+ */
 class TaskEvaluator {
-
-    companion object {
-        const val EXPECT_OPERATOR = "operator"
-        const val EXPECT_OPERAND = "operand"
-
-    }
 
     private val mainStack = Stack<StackItem>()
 
     /**
-     * Evaluates the stack until only one element remains, which will be left on the stack
-     * @param lookAhead may consume the stack, as long as priority of operator on stack is greater or equal to it
+     * Calculates the stack, until only one element remains, which will be left on the stack.
+     * @param lookAhead priority of the "next" operator, we can calculate the stack as long as stack priority is lower
      */
     private fun eatStack(lookAhead: Operator) {
         debugMe("  EAT_STACK: stack: $mainStack")
@@ -49,13 +68,17 @@ class TaskEvaluator {
         debugMe("  EAT_STACK: done -> top element on stack: ${mainStack.peek()}")
     }
 
+    /**
+     * Processes the calculation task.
+     * @param words the calculation task in form of split words
+     * @return result of the calculation
+     */
     fun processInput(words: List<String>): Double {
         // stack must be empty before any calculation
         check(mainStack.empty())
 
         debugMe("input: $words")
 
-        // empty, a dud
         if (words.isEmpty()) {
             debugMe("nothing, empty term")
             return 0.0
@@ -76,28 +99,7 @@ class TaskEvaluator {
         mainStack.push(Operand(word.next().toDouble()))
         mainStack.push(Operator.getOperatorFromString(word.next()))
 
-        /**
-         * "the look ahead" logic
-         *
-         * if "look ahead" operator's priority is higher, then put on stack (cant evaluate for now)
-         * if "look ahead" operator's priority is same or lower, evaluate term, put it on stack and try to process stack
-         *     read "operations" from stack and process them, as long as operator on stack is higher or same priority as "look ahead"
-         *     if "look ahead" is higher, then stop processing the stack and process input
-         *
-         * given that input is well-formed (valid calculation task), then we should be able to calculate the task
-         * anything else indicates an invalid input
-         *
-         * rationale:
-         * - when operators are same priority or lower, we immediately calculate
-         * - we only put operators on stack with an increasing priority - in an order which has to be evaluated top to bottom
-         * - when evaluating the stack, we will do so, until we are not able, because the stack (to the left) has now
-         * a lower priority than unprocessed input to the right
-         * - when the end of the input is reached, the last operator is a special "zero priority" operator and this will ensure
-         * that the stack can be completely consumed
-         *
-         */
         debugMe("----- beginning main loop -----")
-
         while (true) {
 
             // if stack size is 1, we're done, and we can take the result
