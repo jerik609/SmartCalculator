@@ -66,36 +66,38 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
                         println("Unknown command")
                     }
 
-                // handle variable
-                } else if (input[0].contains("[a-zA-Z]".toRegex())) {
+                // handle variable assignment
+                } else if (inputStr.contains("=".toRegex())) {
                     debugMe(">>> variable handler <<<")
-                    // variable assignment
-                    if (isVariableAssignment(inputStr)) {
-                        // valid variable assignment
-                        if (isValidVariableAssignment(inputStr)) {
-                            with(inputStr.split("=").map { it.trim() }) {
-                                // attempt to assign variable to variable
-                                if (this[1].matches("[a-zA-Z]+".toRegex())) {
-                                    if (taskEvaluator.getVariable(this[1]) != null) {
-                                        debugMe("assigning variable to a variable, value ${taskEvaluator.getVariable(this[1])}")
-                                        taskEvaluator.registerVariable(this[0] to taskEvaluator.getVariable(this[1])!!)
-                                    } else {
-                                        println("Unknown variable")
-                                    }
-                                    // regular "number to variable" assignment
+
+                    // valid variable assignment
+                    if (isValidVariableAssignment(inputStr)) {
+                        with(inputStr.split("=").map { it.trim() }) {
+
+                            // attempt to assign variable to variable
+                            if (this[1].matches("[a-zA-Z]+".toRegex())) {
+                                if (taskEvaluator.getVariable(this[1]) != null) {
+                                    debugMe("assigning variable to a variable, value ${taskEvaluator.getVariable(this[1])}")
+                                    taskEvaluator.registerVariable(this[0] to taskEvaluator.getVariable(this[1])!!)
                                 } else {
-                                    taskEvaluator.registerVariable(this[0] to this[1].toDouble())
+                                    println("Unknown variable")
                                 }
+
+                            // regular "number to variable" assignment
+                            } else {
+                                taskEvaluator.registerVariable(this[0] to this[1].toDouble())
                             }
-                        } else {
-                            println("Invalid assignment")
                         }
+                    } else if (isVariableAssignment(inputStr)) {
+                        println("Invalid assignment")
+                    } else {
+                        println("Invalid identifier")
+                    }
 
-                    // inquiry of variable
-                    } else if (isVariableInquiry(inputStr)) {
+                // inquiry of variable
+                } else if (input.size == 1 && input[0].contains("[a-zA-Z]".toRegex())) {
+                    if (isVariableInquiry(inputStr)) {
                         println(taskEvaluator.getVariable(inputStr.trim())?.toInt() ?: "Unknown variable")
-
-                    // simply invalid variable input
                     } else {
                         println("Invalid identifier")
                     }
@@ -116,5 +118,4 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
             }
         } while (!terminate)
     }
-
 }
