@@ -1,7 +1,7 @@
 package calculator
 
 import calculator.core.TaskEvaluator
-import calculator.input.Controller
+import calculator.core.VariablePool
 import calculator.input.Input
 import java.util.*
 
@@ -26,13 +26,14 @@ fun main() {
     val scanner = Scanner(System.`in`)
     scanner.useLocale(Locale.US)
 
-    val controller = Controller(scanner, TaskEvaluator())
+    val controller = Controller(scanner)
 
     controller.mainLoop()
 }
 
 fun tests() {
-    val taskEvaluator = TaskEvaluator()
+    val variablePool = VariablePool()
+    val taskEvaluator = TaskEvaluator(variablePool)
     debugMePrint("Must be able to process simple input with constant priority: ")
         .also { check((taskEvaluator.processInput("2 - 3 + 2 - 5".split(" ")) == -4.0).also { eval(it) }) }
     debugMePrint("Must be able to process input with increase in priority: ")

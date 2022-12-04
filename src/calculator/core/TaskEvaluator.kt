@@ -2,7 +2,6 @@ package calculator.core
 
 import calculator.debugMePrintln
 import java.util.*
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * How does it work:
@@ -29,13 +28,13 @@ import java.util.concurrent.atomic.AtomicReference
  * that the stack can be completely consumed
  *
  */
-class TaskEvaluator(private val variablePool: AtomicReference<VariablePool>) {
+class TaskEvaluator(private val variablePool: VariablePool) {
 
     private val mainStack = Stack<StackItem>()
 
     private fun getOperandFromRawInput(raw: String): Operand {
         return if (raw.matches("[a-zA-Z]+".toRegex())) {
-            Operand(variablePool.get().getVariable(raw) ?: throw UnknownVariableException("Unknown variable $raw"))
+            Operand(variablePool.getVariable(raw) ?: throw UnknownVariableException("Unknown variable $raw"))
         } else {
             Operand(raw.toDouble())
         }

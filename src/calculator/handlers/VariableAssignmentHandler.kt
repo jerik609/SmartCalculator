@@ -3,9 +3,8 @@ package calculator.handlers
 import calculator.core.VariablePool
 import calculator.debugMePrintln
 import calculator.input.Input
-import java.util.concurrent.atomic.AtomicReference
 
-class VariableAssignmentHandler(private val variablePool: AtomicReference<VariablePool>): Handler {
+class VariableAssignmentHandler(private val variablePool: VariablePool): Handler {
 
     override fun isForMe(input: String): Boolean {
         return input.contains("=".toRegex())
@@ -20,16 +19,16 @@ class VariableAssignmentHandler(private val variablePool: AtomicReference<Variab
 
                 // attempt to assign variable to variable
                 if (this[1].matches("[a-zA-Z]+".toRegex())) {
-                    if (variablePool.get().getVariable(this[1]) != null) {
-                        debugMePrintln("assigning variable to a variable, value ${variablePool.get().getVariable(this[1])}")
-                        variablePool.get().registerVariable(this[0] to variablePool.get().getVariable(this[1])!!)
+                    if (variablePool.getVariable(this[1]) != null) {
+                        debugMePrintln("assigning variable to a variable, value ${variablePool.getVariable(this[1])}")
+                        variablePool.registerVariable(this[0] to variablePool.getVariable(this[1])!!)
                     } else {
                         println("Unknown variable")
                     }
 
                     // regular "number to variable" assignment
                 } else {
-                    variablePool.get().registerVariable(this[0] to this[1].toDouble())
+                    variablePool.registerVariable(this[0] to this[1].toDouble())
                 }
             }
         } else if (Input.isVariableAssignment(input)) {

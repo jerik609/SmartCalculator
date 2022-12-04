@@ -1,14 +1,11 @@
-package calculator.input
+package calculator.core
 
-import calculator.core.TaskEvaluator
-import calculator.core.VariablePool
 import calculator.handlers.CommandHandler
 import calculator.handlers.ComputationHandler
 import calculator.handlers.VariableAssignmentHandler
 import calculator.handlers.VariableInquiryHandler
 import java.util.Scanner
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Reads input and calls the respective branch (should implement handlers at some point)
@@ -17,7 +14,7 @@ class Controller(private val scanner: Scanner) {
 
     private val terminate = AtomicBoolean(false)
 
-    private val variablePool = AtomicReference<VariablePool>()
+    private val variablePool = VariablePool()
 
     private val taskEvaluator = TaskEvaluator(variablePool)
 

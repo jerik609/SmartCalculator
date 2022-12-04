@@ -2,9 +2,8 @@ package calculator.handlers
 
 import calculator.core.VariablePool
 import calculator.input.Input
-import java.util.concurrent.atomic.AtomicReference
 
-class VariableInquiryHandler(private val variablePool: AtomicReference<VariablePool>): Handler {
+class VariableInquiryHandler(private val variablePool: VariablePool): Handler {
 
     override fun isForMe(input: String): Boolean {
         val inputList = input.split(" ").map { it.trim() }
@@ -13,7 +12,7 @@ class VariableInquiryHandler(private val variablePool: AtomicReference<VariableP
 
     override fun handle(input: String) {
         if (Input.isVariableInquiry(input)) {
-            println(variablePool.get().getVariable(input.trim())?.toInt() ?: "Unknown variable")
+            println(variablePool.getVariable(input.trim())?.toInt() ?: "Unknown variable")
         } else {
             println("Invalid identifier")
         }
