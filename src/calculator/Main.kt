@@ -1,5 +1,6 @@
 package calculator
 
+import calculator.core.Controller
 import calculator.core.TaskEvaluator
 import calculator.core.VariablePool
 import calculator.input.Input
