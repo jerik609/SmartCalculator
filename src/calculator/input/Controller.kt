@@ -10,6 +10,21 @@ import java.util.Scanner
  */
 class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEvaluator) {
 
+    companion object {
+
+        fun isVariableAssignment(input: String) = input
+            .matches("^\\s*[a-zA-Z]+\\s*=\\s*(.*)\\s*".toRegex())
+            .also { debugMe("`$input` is ${if (!it) "NOT" else ""} a variable assignment") }
+
+        fun isValidVariableAssignment(input: String) = input
+            .matches("^\\s*[a-zA-Z]+\\s*=\\s*([1-9][0-9]*|[a-zA-Z]+)\\s*".toRegex())
+            .also { debugMe("`$input` is ${if (!it) "NOT" else ""} a VALID variable assignment") }
+
+        fun isVariableInquiry(input: String) = input
+            .matches("\\s*[a-zA-Z]+\\s*".toRegex())
+            .also { debugMe("`$input` is ${if (!it) "NOT" else ""} a variable inquiry") }
+    }
+
     private var terminate = false
 
     private fun printHelp() {
@@ -36,10 +51,14 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
 
                 // empty input
                 if (inputStr.isEmpty()) {
-                    // noop
+                    continue
+                }
+
+                val input = inputStr.split(" ").map { it.trim() }
 
                 // handle command
-                } else if (inputStr[0] == '/') {
+                if (input[0][0] == '/') {
+                    debugMe(">>> command handler <<<")
                     try {
                         val command = Input.translateToCommand(inputStr)
                         performCommand(command)
@@ -47,8 +66,43 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
                         println("Unknown command")
                     }
 
+                // handle variable
+                } else if (input[0].contains("[a-zA-Z]".toRegex())) {
+                    debugMe(">>> variable handler <<<")
+                    // variable assignment
+                    if (isVariableAssignment(inputStr)) {
+                        // valid variable assignment
+                        if (isValidVariableAssignment(inputStr)) {
+                            with(inputStr.split("=").map { it.trim() }) {
+                                // attempt to assign variable to variable
+                                if (this[1].matches("[a-zA-Z]+".toRegex())) {
+                                    if (taskEvaluator.getVariable(this[1]) != null) {
+                                        debugMe("assigning variable to a variable, value ${taskEvaluator.getVariable(this[1])}")
+                                        taskEvaluator.registerVariable(this[0] to taskEvaluator.getVariable(this[1])!!)
+                                    } else {
+                                        println("Unknown variable")
+                                    }
+                                    // regular "number to variable" assignment
+                                } else {
+                                    taskEvaluator.registerVariable(this[0] to this[1].toDouble())
+                                }
+                            }
+                        } else {
+                            println("Invalid assignment")
+                        }
+
+                    // inquiry of variable
+                    } else if (isVariableInquiry(inputStr)) {
+                        println(taskEvaluator.getVariable(inputStr.trim())?.toInt() ?: "Unknown variable")
+
+                    // simply invalid variable input
+                    } else {
+                        println("Invalid identifier")
+                    }
+
                 // handle computation
                 } else {
+                    debugMe(">>> computation handler <<<")
                     try {
                         println(taskEvaluator.processInput(inputStr.split(" ")).toInt())
                     } catch (e: InvalidExpressionException) {

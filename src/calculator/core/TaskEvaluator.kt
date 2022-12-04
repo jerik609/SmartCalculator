@@ -31,6 +31,13 @@ import java.util.*
 class TaskEvaluator {
 
     private val mainStack = Stack<StackItem>()
+    private val variables = mutableMapOf<String, Double>()
+
+    fun registerVariable(variable: Pair<String, Double>) {
+        variables[variable.first] = variable.second
+    }
+
+    fun getVariable(variableKey: String) = variables[variableKey]
 
     /**
      * Calculates the stack, until only one element remains, which will be left on the stack.
