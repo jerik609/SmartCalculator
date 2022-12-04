@@ -6,9 +6,11 @@ import calculator.debugMePrintln
 import calculator.input.InvalidExpressionException
 import java.lang.NumberFormatException
 
-class ComputationHandler: Handler {
+class ComputationHandler(private val taskEvaluator: TaskEvaluator): Handler {
 
-    private val taskEvaluator = TaskEvaluator()
+    override fun isForMe(input: String): Boolean {
+        return true
+    }
 
     override fun handle(input: String) {
         debugMePrintln(">>> computation handler <<<")
@@ -26,7 +28,4 @@ class ComputationHandler: Handler {
         }
     }
 
-    override fun isForMe(input: String): Boolean {
-        return true
-    }
 }
