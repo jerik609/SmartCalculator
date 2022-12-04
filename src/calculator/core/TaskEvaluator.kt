@@ -1,6 +1,7 @@
 package calculator.core
 
 import calculator.debugMePrintln
+import calculator.input.Input
 import java.util.*
 
 /**
@@ -81,7 +82,11 @@ class TaskEvaluator(private val variablePool: VariablePool) {
      * @param words the calculation task in form of split words
      * @return result of the calculation
      */
-    fun processInput(words: List<String>): Double {
+    fun processInput(input: String): Double {
+
+        // sanitize input and split
+        val words = Input.sanitizeInput(input).split(" ")
+
         // stack must be empty before any calculation
         check(mainStack.empty())
 

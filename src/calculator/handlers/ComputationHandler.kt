@@ -15,7 +15,7 @@ class ComputationHandler(private val taskEvaluator: TaskEvaluator): Handler {
     override fun handle(input: String) {
         debugMePrintln(">>> computation handler <<<")
         try {
-            println(taskEvaluator.processInput(input.split(" ")).toInt())
+            println(taskEvaluator.processInput(input).toInt())
         } catch (e: InvalidExpressionException) {
             debugMePrintln(e.message ?: "")
             println("Invalid expression")

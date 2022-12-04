@@ -47,8 +47,9 @@ class Operator(val type: OperatorType): StackItem {
         SUBTRACTION('-', 1, { operand1, operand2 -> Operand(operand1.value - operand2.value) }),
         MULTIPLICATION('*', 2, { operand1, operand2 -> Operand(operand1.value * operand2.value) }),
         DIVISION('/', 2, { operand1, operand2 -> Operand(operand1.value / operand2.value) }),
-        EXPONENT('^', 3, { operand1, operand2 -> Operand(operand1.value.pow(operand2.value)) }) ;
-        // PARENTHESES_?('(', 4, { operand1, operand2 -> ??? } ) - tough cookie
+        EXPONENT('^', 3, { operand1, operand2 -> Operand(operand1.value.pow(operand2.value)) }),
+        PARENTHESES_OPENING('(', 4, { _, _ -> Operand(0.0) } ),
+        PARENTHESES_CLOSING(')', 4, { _, _ -> Operand(0.0) } ), ;
     }
 
     override fun toString(): String {

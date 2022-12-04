@@ -25,6 +25,11 @@ class Input {
             .matches("\\s*[a-zA-Z]+\\s*".toRegex())
             .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable inquiry") }
 
+        fun sanitizeInput(input: String) = input
+            .replace("[\\+\\-\\*\\/\\^\\(\\)]".toRegex()) { match -> " ${match.value} " }
+            .trim()
+            .replace("[' ']+".toRegex(), " ")
+            .also { debugMePrintln("original input: >$input< \nsanitized input: >$it<") }
     }
 
 }
