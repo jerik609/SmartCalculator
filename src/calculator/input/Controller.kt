@@ -4,6 +4,7 @@ import calculator.core.TaskEvaluator
 import calculator.core.UnknownVariableException
 import calculator.debugMePrintln
 import calculator.handlers.CommandHandler
+import calculator.handlers.ComputationHandler
 import java.lang.NumberFormatException
 import java.util.Scanner
 import java.util.concurrent.atomic.AtomicBoolean
@@ -16,6 +17,7 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
     private val terminate = AtomicBoolean(false)
 
     private val commandHandler = CommandHandler(terminate)
+    private val computationHandler = ComputationHandler()
 
     fun mainLoop() {
         do {
@@ -72,19 +74,7 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
 
                 // handle computation
                 } else {
-                    debugMePrintln(">>> computation handler <<<")
-                    try {
-                        println(taskEvaluator.processInput(inputStr.split(" ")).toInt())
-                    } catch (e: InvalidExpressionException) {
-                        debugMePrintln(e.message ?: "")
-                        println("Invalid expression")
-                    } catch (e: NumberFormatException) {
-                        debugMePrintln(e.message ?: "")
-                        println("Invalid expression")
-                    } catch (e: UnknownVariableException) {
-                        debugMePrintln(e.message ?: "")
-                        println("Unknown variable")
-                    }
+                    computationHandler.handle(inputStr)
                 }
             }
         } while (!terminate.get())
