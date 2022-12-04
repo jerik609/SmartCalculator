@@ -3,30 +3,19 @@ package calculator.input
 import calculator.core.TaskEvaluator
 import calculator.core.UnknownVariableException
 import calculator.debugMePrintln
+import calculator.handlers.CommandHandler
 import java.lang.NumberFormatException
 import java.util.Scanner
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Reads input and calls the respective branch (should implement handlers at some point)
  */
 class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEvaluator) {
 
-    private var terminate = false
+    private val terminate = AtomicBoolean(false)
 
-    private fun printHelp() {
-        println("The program calculates the sum of numbers")
-    }
-
-    private fun performCommand(command: Command) {
-        when(command) {
-            Command.EXIT -> {
-                println("Bye!")
-                terminate = true
-            }
-            Command.HELP -> printHelp()
-            else -> println("Unhandled command: $command")
-        }
-    }
+    private val commandHandler = CommandHandler(terminate)
 
     fun mainLoop() {
         do {
@@ -42,15 +31,8 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
 
                 val input = inputStr.split(" ").map { it.trim() }
 
-                // handle command
-                if (input[0][0] == '/') {
-                    debugMePrintln(">>> command handler <<<")
-                    try {
-                        val command = Input.translateToCommand(inputStr)
-                        performCommand(command)
-                    } catch (e: UnknownCommandException) {
-                        println("Unknown command")
-                    }
+                if (commandHandler.isForMe(inputStr)) {
+                    commandHandler.handle(inputStr)
 
                 // handle variable assignment
                 } else if (inputStr.contains("=".toRegex())) {
@@ -105,6 +87,6 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
                     }
                 }
             }
-        } while (!terminate)
+        } while (!terminate.get())
     }
 }
