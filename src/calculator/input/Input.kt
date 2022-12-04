@@ -8,7 +8,7 @@ class Input {
             for (command in Command.values()) {
                 if (command.equalsStr(commandStr)) return command
             }
-            return Command.NOT_A_COMMAND
+            throw UnknownCommandException("Unknown command: $commandStr")
         }
 
     }

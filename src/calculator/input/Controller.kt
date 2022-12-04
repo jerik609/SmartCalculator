@@ -1,6 +1,8 @@
 package calculator.input
 
 import calculator.core.TaskEvaluator
+import calculator.debugMe
+import java.lang.NumberFormatException
 import java.util.Scanner
 
 /**
@@ -28,25 +30,37 @@ class Controller(private val scanner: Scanner, private val taskEvaluator: TaskEv
     fun mainLoop() {
         do {
             if (scanner.hasNextLine()) {
+
+                // read input
                 val inputStr = scanner.nextLine()
 
-                // we're dealing with a valid command
-                val command = Input.translateToCommand(inputStr)
-                if (command != Command.NOT_A_COMMAND) {
-                    performCommand(command)
-                    continue
-                }
+                // empty input
+                if (inputStr.isEmpty()) {
+                    // noop
 
-                // not a command, must be a computation task
-                if (inputStr.isNotEmpty()) {
-                    println(taskEvaluator.processInput(inputStr.split(" ")).toInt())
-                    continue
-                }
+                // handle command
+                } else if (inputStr[0] == '/') {
+                    try {
+                        val command = Input.translateToCommand(inputStr)
+                        performCommand(command)
+                    } catch (e: UnknownCommandException) {
+                        println("Unknown command")
+                    }
 
-                // something is not correct, report problem
-                if (inputStr.isNotEmpty()) println("invalid input: $inputStr")
+                // handle computation
+                } else {
+                    try {
+                        println(taskEvaluator.processInput(inputStr.split(" ")).toInt())
+                    } catch (e: InvalidExpressionException) {
+                        debugMe(e.message ?: "")
+                        println("Invalid expression")
+                    } catch (e: NumberFormatException) {
+                        debugMe(e.message ?: "")
+                        println("Invalid expression")
+                    }
+                }
             }
-        } while(!terminate)
+        } while (!terminate)
     }
 
 }

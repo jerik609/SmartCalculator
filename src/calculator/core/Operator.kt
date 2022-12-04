@@ -1,6 +1,7 @@
 package calculator.core
 
 import calculator.debugMe
+import calculator.input.InvalidExpressionException
 import java.lang.IllegalArgumentException
 import kotlin.math.pow
 
@@ -32,7 +33,7 @@ class Operator(val type: OperatorType): StackItem {
                 '*' -> Operator(OperatorType.MULTIPLICATION)
                 '/' -> Operator(OperatorType.DIVISION)
                 '^' -> Operator(OperatorType.EXPONENT)
-                else -> throw IllegalArgumentException("Invalid operator $input")
+                else -> throw InvalidExpressionException("Invalid operator: $input")
             }
         }
     }
