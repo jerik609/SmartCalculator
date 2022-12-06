@@ -14,23 +14,21 @@ class Operator(val type: OperatorType): StackItem {
                 '+' -> "\\++".toRegex()
                 '*' -> "\\*+".toRegex()
                 '^' -> "\\^+".toRegex()
+                '(' -> "\\(+".toRegex()
+                ')' -> "\\)+".toRegex()
                 else -> "${input[0]}+".toRegex()
             }
             //debugMe("input: $input, regex: $rex")
             require(input.matches(rex))
 
             return when (input[0]) {
-                '+' -> {
-                    //debugMe("only pluses")
-                    Operator(OperatorType.ADDITION)
-                }
-                '-' -> {
-                    //debugMe("only minuses")
-                    if (input.length % 2 == 0) Operator(OperatorType.ADDITION) else Operator(OperatorType.SUBTRACTION)
-                }
+                '+' -> Operator(OperatorType.ADDITION)
+                '-' -> if (input.length % 2 == 0) Operator(OperatorType.ADDITION) else Operator(OperatorType.SUBTRACTION)
                 '*' -> Operator(OperatorType.MULTIPLICATION)
                 '/' -> Operator(OperatorType.DIVISION)
                 '^' -> Operator(OperatorType.EXPONENT)
+                '(' -> Operator(OperatorType.PARENTHESES_OPENING)
+                ')' -> Operator(OperatorType.PARENTHESES_CLOSING)
                 else -> throw InvalidExpressionException("Invalid operator: $input")
             }
         }
