@@ -6,7 +6,7 @@ import calculator.core.VariablePool
 import calculator.input.Input
 import java.util.*
 
-const val debugActivated = false
+const val debugActivated = true
 
 fun debugMePrintln(msg: String) {
     if (debugActivated) println(msg)
@@ -76,4 +76,6 @@ fun tests() {
         .also { check((taskEvaluator.processInput("(((((2+3) )) ))") == 5.0).also { eval(it) }) }
     debugMePrintln("Evaluate task from examples (with brackets): ")
         .also { check((taskEvaluator.processInput("3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1)") == 121.0).also { eval(it) }) }
+    debugMePrintln("Another crazy test from academy: ")
+        .also { check((taskEvaluator.processInput("5 --- 2 ++++++ 4 -- 2 ---- 1") == 10.0).also { eval(it) }) }
 }

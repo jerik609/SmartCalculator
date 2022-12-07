@@ -23,7 +23,7 @@ class Operator(val type: OperatorType): StackItem {
 
             return when (input[0]) {
                 '+' -> Operator(OperatorType.ADDITION)
-                '-' -> if (input.length % 2 == 0) Operator(OperatorType.ADDITION) else Operator(OperatorType.SUBTRACTION)
+                '-' -> Operator(OperatorType.SUBTRACTION)
                 '*' -> Operator(OperatorType.MULTIPLICATION)
                 '/' -> Operator(OperatorType.DIVISION)
                 '^' -> Operator(OperatorType.EXPONENT)

@@ -23,8 +23,8 @@ class CommandHandler(private val terminate: AtomicBoolean): Handler {
         }
     }
 
-    override fun isForMe(input: String): Boolean {
-        val input = input.split(" ").map { it.trim() }
+    override fun isForMe(_input: String): Boolean {
+        val input = _input.trim().split("\\s".toRegex()).map { it.trim() }
         return input[0][0] == '/'
     }
 

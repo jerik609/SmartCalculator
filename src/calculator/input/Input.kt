@@ -1,5 +1,6 @@
 package calculator.input
 
+import calculator.core.Operator
 import calculator.debugMePrintln
 
 class Input {
@@ -25,11 +26,20 @@ class Input {
             .matches("\\s*[a-zA-Z]+\\s*".toRegex())
             .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable inquiry") }
 
-        fun sanitizeInput(input: String) = input
-            .replace("[\\+\\-\\*\\/\\^\\(\\)]".toRegex()) { match -> " ${match.value} " }
-            .trim()
-            .replace("[' ']+".toRegex(), " ")
-            .also { debugMePrintln("original input: >$input< \nsanitized input: >$it<") }
+        fun sanitizeInput(input: String): String {
+            val xyz = input.trim().split("\\s".toRegex()).toMutableList()
+            for (item in xyz.indices) {
+                if (xyz[item].matches("-+".toRegex())) {
+                    xyz[item] = if (xyz[item].length % 2 == 0) "+" else "-"
+                } else if (xyz[item].matches("\\++".toRegex())) {
+                    xyz[item] = "+"
+                }
+            }
+            return xyz.joinToString(" ").replace("[\\+\\-\\*\\/\\^\\(\\)]".toRegex()) { match -> " ${match.value} " }
+                .trim()
+                .replace("[' ']+".toRegex(), " ")
+                .also { debugMePrintln("original input: >$input< \nsanitized input: >$it<") }
+        }
     }
 
 }
