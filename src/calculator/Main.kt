@@ -6,7 +6,7 @@ import calculator.core.VariablePool
 import calculator.input.Input
 import java.util.*
 
-const val debugActivated = true
+const val debugActivated = false
 
 fun debugMePrintln(msg: String) {
     if (debugActivated) println(msg)
@@ -78,4 +78,16 @@ fun tests() {
         .also { check((taskEvaluator.processInput("3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1)") == 121.0).also { eval(it) }) }
     debugMePrintln("Another crazy test from academy: ")
         .also { check((taskEvaluator.processInput("5 --- 2 ++++++ 4 -- 2 ---- 1") == 10.0).also { eval(it) }) }
+
+    /*
+    I could really benefit from negative test cases:
+    > 8 * (2 + 3
+    Invalid expression
+    > 4 + 5)
+    Invalid expression
+    > 2 ************ 2
+    Invalid expression
+    > 2 // 2
+     */
+
 }

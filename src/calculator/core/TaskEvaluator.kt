@@ -163,6 +163,8 @@ class TaskEvaluator(private val variablePool: VariablePool) {
      */
     fun processInput(input: String): Double {
 
+        mainStack.clear()
+
         // sanitize input and split
         val words = Input.sanitizeInput(input).split(" ")
 

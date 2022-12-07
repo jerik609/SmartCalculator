@@ -27,6 +27,12 @@ class Input {
             .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable inquiry") }
 
         fun sanitizeInput(input: String): String {
+
+            // validate brackets
+            if (input.contains(')') != input.contains('(')) {
+                throw InvalidExpressionException("number of opening and closing brackets do not match")
+            }
+
             val xyz = input.trim().split("\\s".toRegex()).toMutableList()
             for (item in xyz.indices) {
                 if (xyz[item].matches("-+".toRegex())) {
