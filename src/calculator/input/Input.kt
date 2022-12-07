@@ -27,8 +27,7 @@ class Input {
             .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable inquiry") }
 
         fun sanitizeInput(input: String): String {
-
-            // validate brackets
+            // basic brackets validation (we have no dedicated input validator - so I'll keep this here)
             if (input.contains(')') != input.contains('(')) {
                 throw InvalidExpressionException("number of opening and closing brackets do not match")
             }

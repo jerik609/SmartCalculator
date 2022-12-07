@@ -16,22 +16,9 @@ fun debugMePrint(msg: String) {
     if (debugActivated) print(msg)
 }
 
-fun eval(x: Boolean) {
-    debugMePrintln(if (x) "* TEST OK *" else "!!! TEST NOT OK !!!")
+fun eval(result: Boolean) {
+    debugMePrintln(if (result) "* TEST OK *" else "!!! TEST NOT OK !!!")
 }
-
-/**
- * notes:
- *
- * 1. when receiving this stupid input with "+(<number>" numbers slapped on each other without spaces - just use
- * regex to add spaces and then tokenize
- * 2. brackets are rather simple - write them as operators
- * when "(" bracket - increase the priority, like infinite priority, just write (including the bracket) and continue
- * when ")" bracket - start evaluating until other bracket is reached ... it should be possible, it's like
- * the whole calculation was in between two "master brackets"
- *
- *
- */
 
 fun main() {
 

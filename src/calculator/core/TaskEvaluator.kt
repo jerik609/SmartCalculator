@@ -3,7 +3,6 @@ package calculator.core
 import calculator.debugMePrintln
 import calculator.input.Input
 import calculator.input.InvalidExpressionException
-import calculator.main
 import java.util.*
 
 /**
@@ -113,12 +112,11 @@ class TaskEvaluator(private val variablePool: VariablePool) {
      * It returns `true` when it encountered a bracket.
      * If it reaches end of input and the last symbol it read is an opening bracket, it throws an exception.
      * We assume, that:
-     *   - only this is valid: "((((...", "(((A..."
+     *   - only this is valid: "((((...", "(((A...", "...A)))"
      *   - these are all the invalid cases: "(((+...", "((()..."
      * @param iterator the input iterator
      * @return true if left bracket encountered
      */
-    // another valid case -> A ))
     private fun readOperandAndPutOnStackWithAllPrecedingOpeningBrackets(iterator: Iterator<String>): Boolean {
         if (!iterator.hasNext()) return false
         var word = iterator.next()
@@ -141,6 +139,12 @@ class TaskEvaluator(private val variablePool: VariablePool) {
         return seenOpeningBracket
     }
 
+    /**
+     * Get number of subsequent closing brackets, so that we know how far we can evaluate the stack.
+     * @param iterator the input iterator
+     * @return a pair of values, the number of closing brackets and the lookAhead operator (the next operator after
+     *         closing brackets)
+     */
     private fun getNumberOfSubsequentClosingBrackets(iterator: Iterator<String>): Pair<Int, Operator> {
         var counter = 1 // already one found
         if (!iterator.hasNext()) return Pair(counter, Operator(Operator.OperatorType.ZERO_OPERATOR)) // end of stream
@@ -225,7 +229,7 @@ class TaskEvaluator(private val variablePool: VariablePool) {
                     break
                     // there's a next word
                 } else {
-                    var lookAhead = Operator.getOperatorFromString(word.next())
+                    val lookAhead = Operator.getOperatorFromString(word.next())
                     debugMePrintln("the lookAhead operator: $lookAhead")
 
                     // we encountered a closing bracket, calculate and put on stack, we will evaluate it
@@ -250,14 +254,6 @@ class TaskEvaluator(private val variablePool: VariablePool) {
                         mainStack.push(operator.performOperation(leftOperand, rightOperand))
                         eatStack(lookAhead)
                     }
-
-                    // push the look ahead on stack so that it's not lost
-                    // unless it is the closing bracket - since it triggers the stack evaluation, it can be removed,
-                    // because a matching opening bracket is found and everything in between them is evaluated = they
-                    // become meaningless
-//                    if (lookAhead.type != Operator.OperatorType.PARENTHESES_CLOSING) {
-//                        mainStack.push(lookAhead)
-//                    }
 
                     debugMePrintln("stack: $mainStack")
                     debugMePrintln("----- next loop -----")
