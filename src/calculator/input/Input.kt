@@ -18,7 +18,7 @@ class Input {
             .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a variable assignment") }
 
         fun isValidVariableAssignment(input: String) = input
-            .matches("^\\s*[a-zA-Z]+\\s*=\\s*(0|[1-9][0-9]*|[a-zA-Z]+)\\s*".toRegex())
+            .matches("^\\s*[a-zA-Z]+\\s*=\\s*-?(0|[1-9][0-9]*|[a-zA-Z]+)\\s*".toRegex())
             .also { debugMePrintln("`$input` is ${if (!it) "NOT" else ""} a VALID variable assignment") }
 
         fun isVariableInquiry(input: String) = input
