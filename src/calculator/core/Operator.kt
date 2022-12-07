@@ -1,7 +1,7 @@
 package calculator.core
 
 import calculator.input.InvalidExpressionException
-import kotlin.math.pow
+import java.math.BigInteger
 
 class Operator(val type: OperatorType): StackItem {
 
@@ -40,14 +40,14 @@ class Operator(val type: OperatorType): StackItem {
         val priority: Int,
         val operation: (Operand, Operand) -> Operand
     ) {
-        ZERO_OPERATOR('0', 0, { _, _ -> Operand(0.0) }),
+        ZERO_OPERATOR('0', 0, { _, _ -> Operand(BigInteger.ZERO) }),
         ADDITION('+', 1, { operand1, operand2 -> Operand(operand1.value + operand2.value) }),
         SUBTRACTION('-', 1, { operand1, operand2 -> Operand(operand1.value - operand2.value) }),
         MULTIPLICATION('*', 2, { operand1, operand2 -> Operand(operand1.value * operand2.value) }),
         DIVISION('/', 2, { operand1, operand2 -> Operand(operand1.value / operand2.value) }),
-        EXPONENT('^', 3, { operand1, operand2 -> Operand(operand1.value.pow(operand2.value)) }),
-        PARENTHESES_OPENING('(', 4, { _, _ -> Operand(0.0) } ),
-        PARENTHESES_CLOSING(')', 4, { _, _ -> Operand(0.0) } ), ;
+        EXPONENT('^', 3, { operand1, operand2 -> Operand(operand1.value.pow(operand2.value.toInt())) }),
+        PARENTHESES_OPENING('(', 4, { _, _ -> Operand(BigInteger.ZERO) } ),
+        PARENTHESES_CLOSING(')', 4, { _, _ -> Operand(BigInteger.ZERO) } ), ;
     }
 
     override fun toString(): String {

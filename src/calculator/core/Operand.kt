@@ -1,7 +1,9 @@
 package calculator.core
 
-class Operand(value: Double): StackItem {
-    var value: Double = value
+import java.math.BigInteger
+
+class Operand(value: BigInteger): StackItem {
+    var value: BigInteger = value
         private set
 
     override fun toString(): String {

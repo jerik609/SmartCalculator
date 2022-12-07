@@ -1,8 +1,10 @@
 package calculator.core
 
+import calculator.data.VariablePool
 import calculator.debugMePrintln
 import calculator.input.Input
 import calculator.input.InvalidExpressionException
+import java.math.BigInteger
 import java.util.*
 
 /**
@@ -38,7 +40,7 @@ class TaskEvaluator(private val variablePool: VariablePool) {
         return if (raw.matches("[a-zA-Z]+".toRegex())) {
             Operand(variablePool.getVariable(raw) ?: throw UnknownVariableException("Unknown variable $raw"))
         } else {
-            Operand(raw.toDouble())
+            Operand(raw.toBigInteger())
         }
     }
 
@@ -165,7 +167,7 @@ class TaskEvaluator(private val variablePool: VariablePool) {
      * @param input the calculation task in form of a string
      * @return result of the calculation
      */
-    fun processInput(input: String): Double {
+    fun processInput(input: String): BigInteger {
 
         mainStack.clear()
 
@@ -179,7 +181,7 @@ class TaskEvaluator(private val variablePool: VariablePool) {
 
         if (words.isEmpty()) {
             debugMePrintln("nothing, empty term")
-            return 0.0
+            return BigInteger.ZERO
         }
 
         // the iterator

@@ -1,6 +1,6 @@
 package calculator.handlers
 
-import calculator.core.VariablePool
+import calculator.data.VariablePool
 import calculator.input.Input
 
 class VariableInquiryHandler(private val variablePool: VariablePool): Handler {
@@ -12,7 +12,7 @@ class VariableInquiryHandler(private val variablePool: VariablePool): Handler {
 
     override fun handle(input: String) {
         if (Input.isVariableInquiry(input)) {
-            println(variablePool.getVariable(input.trim())?.toInt() ?: "Unknown variable")
+            println(variablePool.getVariable(input.trim())?.toString() ?: "Unknown variable")
         } else {
             println("Invalid identifier")
         }

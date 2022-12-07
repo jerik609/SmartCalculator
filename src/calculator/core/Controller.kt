@@ -1,5 +1,6 @@
 package calculator.core
 
+import calculator.data.VariablePool
 import calculator.handlers.CommandHandler
 import calculator.handlers.ComputationHandler
 import calculator.handlers.VariableAssignmentHandler

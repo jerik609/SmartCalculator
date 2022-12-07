@@ -1,8 +1,9 @@
 package calculator.handlers
 
-import calculator.core.VariablePool
+import calculator.data.VariablePool
 import calculator.debugMePrintln
 import calculator.input.Input
+import java.math.BigInteger
 
 class VariableAssignmentHandler(private val variablePool: VariablePool): Handler {
 
@@ -26,9 +27,9 @@ class VariableAssignmentHandler(private val variablePool: VariablePool): Handler
                         println("Unknown variable")
                     }
 
-                    // regular "number to variable" assignment
+                // regular "number to variable" assignment
                 } else {
-                    variablePool.registerVariable(this[0] to this[1].toDouble())
+                    variablePool.registerVariable(this[0] to BigInteger(this[1]))
                 }
             }
         } else if (Input.isVariableAssignment(input)) {
