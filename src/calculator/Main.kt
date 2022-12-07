@@ -6,7 +6,7 @@ import calculator.core.VariablePool
 import calculator.input.Input
 import java.util.*
 
-const val debugActivated = true
+const val debugActivated = false
 
 fun debugMePrintln(msg: String) {
     if (debugActivated) println(msg)
@@ -35,7 +35,7 @@ fun eval(x: Boolean) {
 
 fun main() {
 
-    //tests()
+    tests()
 
     val scanner = Scanner(System.`in`)
     scanner.useLocale(Locale.US)
@@ -68,6 +68,12 @@ fun tests() {
         .also { check((!Input.isVariableAssignment("    ads3akdjs   3438 = 333  ")).also { eval(it) }) }
     debugMePrintln("Evaluate task without spaces: ")
         .also { check((taskEvaluator.processInput("5*2+2*3-7*2+3^2-10") == 1.0).also { eval(it) }) }
-//    debugMePrintln("Evaluate task without spaces (with brackets): ")
-//        .also { check((taskEvaluator.processInput("5*2+2*3-7*(2+3)") == -19.0).also { eval(it) }) }
+    debugMePrintln("Evaluate task with simple brackets: ")
+        .also { check((taskEvaluator.processInput("(2+3)") == 5.0).also { eval(it) }) }
+    debugMePrintln("Evaluate task without spaces (with brackets): ")
+        .also { check((taskEvaluator.processInput("5*2+2*3-7*(2+3)") == -19.0).also { eval(it) }) }
+    debugMePrintln("Evaluate task with nested brackets (with brackets): ")
+        .also { check((taskEvaluator.processInput("(((((2+3) )) ))") == 5.0).also { eval(it) }) }
+    debugMePrintln("Evaluate task from examples (with brackets): ")
+        .also { check((taskEvaluator.processInput("3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1)") == 121.0).also { eval(it) }) }
 }

@@ -3,6 +3,7 @@ package calculator.core
 import calculator.debugMePrintln
 import calculator.input.Input
 import calculator.input.InvalidExpressionException
+import calculator.main
 import java.util.*
 
 /**
@@ -46,7 +47,7 @@ class TaskEvaluator(private val variablePool: VariablePool) {
      * Calculates the stack, until only one element remains, which will be left on the stack.
      * @param lookAhead priority of the "next" operator, we can calculate the stack as long as stack priority is lower
      */
-    private fun eatStack(lookAhead: Operator) {
+    private fun eatStack(lookAhead: Operator, _acceptOpeningParentheses: Int = 0) {
         /**
          * if we encountered a closing bracket, we have to eat the stack backwards until the opening bracket
          * the way we've worked "up the stack" guarantees, that the stack sequence is ever-growing in priority
@@ -54,8 +55,10 @@ class TaskEvaluator(private val variablePool: VariablePool) {
          */
         debugMePrintln("  EAT_STACK: stack: $mainStack")
         debugMePrintln("  EAT_STACK: ----- beginning main loop -----")
+        var acceptOpeningParentheses = _acceptOpeningParentheses
+        debugMePrintln("  EAT_STACK: will accept $acceptOpeningParentheses opening brackets")
         do {
-            if (mainStack.size < 3) {
+            if (mainStack.size < 2) {
                 debugMePrintln("  EAT_STACK: ----- no more terms left on stack, depth: ${mainStack.size} -----")
                 break
             }
@@ -63,10 +66,19 @@ class TaskEvaluator(private val variablePool: VariablePool) {
             val rightOperand = mainStack.pop() as Operand
             val operator = mainStack.pop() as Operator
 
+            // do not consume past opening brackets if not triggered with closing bracket
             if (operator.type == Operator.OperatorType.PARENTHESES_OPENING) {
-                debugMePrintln("   EAT_STACK: left bracket encountered ($operator), we're done")
-                mainStack.push(rightOperand)
-                break
+                debugMePrintln("  EAT_STACK: left bracket encountered `$operator`, can accept $acceptOpeningParentheses opening brackets")
+                if (acceptOpeningParentheses > 0) {
+                    --acceptOpeningParentheses
+                    debugMePrintln("  EAT_STACK: left bracket consumed, ($acceptOpeningParentheses) remaining")
+                    mainStack.push(rightOperand)
+                } else {
+                    debugMePrintln("  EAT_STACK: cannot consume bracket, none remaining")
+                    mainStack.push(operator)
+                    mainStack.push(rightOperand)
+                    break
+                }
             } else {
                 val leftOperand = mainStack.pop() as Operand
 
@@ -87,6 +99,10 @@ class TaskEvaluator(private val variablePool: VariablePool) {
             debugMePrintln("  EAT_STACK: ----- next loop -----")
         } while (true)
 
+        if (lookAhead.type != Operator.OperatorType.ZERO_OPERATOR && lookAhead.type != Operator.OperatorType.PARENTHESES_CLOSING) {
+            mainStack.push(lookAhead)
+        }
+
         debugMePrintln("  EAT_STACK: done -> top element on stack: ${mainStack.peek()}")
     }
 
@@ -102,7 +118,9 @@ class TaskEvaluator(private val variablePool: VariablePool) {
      * @param iterator the input iterator
      * @return true if left bracket encountered
      */
+    // another valid case -> A ))
     private fun readOperandAndPutOnStackWithAllPrecedingOpeningBrackets(iterator: Iterator<String>): Boolean {
+        if (!iterator.hasNext()) return false
         var word = iterator.next()
         var seenOpeningBracket = false
         do {
@@ -123,9 +141,24 @@ class TaskEvaluator(private val variablePool: VariablePool) {
         return seenOpeningBracket
     }
 
+    private fun getNumberOfSubsequentClosingBrackets(iterator: Iterator<String>): Pair<Int, Operator> {
+        var counter = 1 // already one found
+        if (!iterator.hasNext()) return Pair(counter, Operator(Operator.OperatorType.ZERO_OPERATOR)) // end of stream
+        var word = iterator.next()
+        do {
+            if (word == Operator.OperatorType.PARENTHESES_CLOSING.visual.toString()) {
+                ++counter
+            } else {
+                break
+            }
+        } while (iterator.hasNext().also { if (it) word = iterator.next()  })
+
+        return Pair(counter, Operator.getOperatorFromString(word))
+    }
+
     /**
      * Processes the calculation task.
-     * @param words the calculation task in form of split words
+     * @param input the calculation task in form of a string
      * @return result of the calculation
      */
     fun processInput(input: String): Double {
@@ -167,56 +200,66 @@ class TaskEvaluator(private val variablePool: VariablePool) {
                 break
             }
 
-            // stack: ... X1 +_1 X2 +_2 X3 +_3 <<< we're here
-            val operator = mainStack.pop() as Operator // +_3
-            val leftOperand = mainStack.pop() as Operand // X3
+            // if we find an opening bracket, read all of them and go to next iteration - can't evaluate
+            if (readOperandAndPutOnStackWithAllPrecedingOpeningBrackets(word)) {
+                // read operator, put on stack and continue with next iteration (operand is already there)
+                mainStack.push(Operator.getOperatorFromString(word.next()))
 
-            // words: we're here >>> X4 + x_4 + X5 + x_5 ...
-            // OR-> words: we're here >>> (_1 X4 + x_4 + X5 + x_5 ...
-            val curr = word.next()
-            if (curr == "(") { }
-            // there's no right operand -> write everything on stack and carry on with next loop
-            // read two more and put on stack ... but again we can have multiple (
-            // so read all brackets, anything else must be OPERAND and OPERATOR ... we cannot have ( ) + ( ) ? WE CAN, BUT WE'RE DEALING WITH OPENING BRACKETS NOW
-            // ( ) is invalid, ( A ) is invalid, ((((( A + ) is invalid
-            val rightOperand = getOperandFromRawInput(word.next()) // X4
-
-            debugMePrintln("processing term: $leftOperand $operator $rightOperand")
-
-            // input is processed, just evaluate stack
-            if (!word.hasNext()) {
-                debugMePrintln("the end of input, now just finish stack and we're done")
-                mainStack.push(operator.performOperation(leftOperand, rightOperand))
-                eatStack(Operator(Operator.OperatorType.ZERO_OPERATOR))
-                break
-            // there's a next word
+            // no opening bracket, just evaluate what's on stack (with respect to lookAhead)
             } else {
-                val lookAhead = Operator.getOperatorFromString(word.next())
-                debugMePrintln("the lookAhead operator: $lookAhead")
+                // we have both operands and the operator on stack
+                // `left` and `operator` from previous iteration, `right` from the opening bracket search
+                val rightOperand = mainStack.pop() as Operand
+                val operator = mainStack.pop() as Operator
+                val leftOperand = mainStack.pop() as Operand
 
-                // if "look ahead" operator's priority is higher, only put everything on stack (can't evaluate for now)
-                if (operator.type.priority < lookAhead.type.priority) {
-                    debugMePrintln("lookAhead has higher priority, just put on stack and read next value")
-                    mainStack.push(leftOperand)
-                    mainStack.push(operator)
-                    mainStack.push(rightOperand)
-                // if "look ahead" operator's priority is lower or the same, calculate operation and try to consume stack
-                } else {
-                    debugMePrintln("lookAhead has lower or same priority, calculate & put on stack, then evaluate stack")
+                debugMePrintln("processing term: $leftOperand $operator $rightOperand")
+
+                // input is processed, just evaluate stack
+                if (!word.hasNext()) {
+                    debugMePrintln("the end of input, now just finish stack and we're done")
                     mainStack.push(operator.performOperation(leftOperand, rightOperand))
-                    eatStack(lookAhead)
-                }
+                    eatStack(Operator(Operator.OperatorType.ZERO_OPERATOR))
+                    break
+                    // there's a next word
+                } else {
+                    var lookAhead = Operator.getOperatorFromString(word.next())
+                    debugMePrintln("the lookAhead operator: $lookAhead")
 
-                // push the look ahead on stack so that it's not lost
-                // unless it is the closing bracket - since it triggers the stack evaluation, it can be removed,
-                // because a matching opening bracket is found and everything in between them is evaluated = they
-                // become meaningless
-                if (lookAhead.type != Operator.OperatorType.PARENTHESES_CLOSING) {
-                    mainStack.push(lookAhead)
-                }
+                    // we encountered a closing bracket, calculate and put on stack, we will evaluate it
+                    // after closing bracket, only another operator is allowed - the new lookAhead - provide it, if available
+                    if (lookAhead.type == Operator.OperatorType.PARENTHESES_CLOSING) {
+                        debugMePrintln("encountered closing bracket, triggering stack evaluation")
+                        val resultPair = getNumberOfSubsequentClosingBrackets(word)
+                        mainStack.push(operator.performOperation(leftOperand, rightOperand))
+                        eatStack(resultPair.second, resultPair.first)
 
-                debugMePrintln("stack: $mainStack")
-                debugMePrintln("----- next loop -----")
+                    // if "look ahead" operator's priority is higher, only put everything on stack (can't evaluate for now)
+                    } else if (operator.type.priority < lookAhead.type.priority) {
+                        debugMePrintln("lookAhead has higher priority, just put on stack and read next value")
+                        mainStack.push(leftOperand)
+                        mainStack.push(operator)
+                        mainStack.push(rightOperand)
+                        mainStack.push(lookAhead)
+
+                    // if "look ahead" operator's priority is lower or the same, calculate operation and try to consume stack
+                    } else {
+                        debugMePrintln("lookAhead has lower or same priority, calculate & put on stack, then evaluate stack")
+                        mainStack.push(operator.performOperation(leftOperand, rightOperand))
+                        eatStack(lookAhead)
+                    }
+
+                    // push the look ahead on stack so that it's not lost
+                    // unless it is the closing bracket - since it triggers the stack evaluation, it can be removed,
+                    // because a matching opening bracket is found and everything in between them is evaluated = they
+                    // become meaningless
+//                    if (lookAhead.type != Operator.OperatorType.PARENTHESES_CLOSING) {
+//                        mainStack.push(lookAhead)
+//                    }
+
+                    debugMePrintln("stack: $mainStack")
+                    debugMePrintln("----- next loop -----")
+                }
             }
         }
         debugMePrintln("done main loop: ${mainStack.peek()}")
